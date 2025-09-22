@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Deletion Request</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #6e8efb, #a777e3);
+        }
+
+        .container {
+            background: white;
+            padding: 2rem 3rem;
+            border-radius: 10px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            max-width: 500px;
+            width: 100%;
+            margin: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 1.5rem;
+            font-size: 1.8rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            color: #555;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+
+        input,
+        textarea {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        input:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #6e8efb;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        button {
+            width: 100%;
+            padding: 1rem;
+            background: #6e8efb;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        button:hover {
+            background: #5a78e0;
+        }
+
+        .info-text {
+            text-align: center;
+            color: #777;
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .message {
+            margin-top: 1rem;
+            padding: 0.8rem;
+            border-radius: 5px;
+            text-align: center;
+            font-size: 0.9rem;
+            display: none;
+            /* Hidden by default */
+        }
+
+        .message.success {
+            background: #e6ffed;
+            color: #2e7d32;
+            display: block;
+        }
+
+        .message.error {
+            background: #ffebee;
+            color: #c62828;
+            display: block;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 1.5rem;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Account Deletion Request</h1>
+        <p class="info-text">Please fill out the form below to request account deletion. We will process your request
+            within 7 business days.</p>
+        <form id="delete-account-form">
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email" placeholder="Enter your email" required>
+            </div>
+            <div class="form-group">
+                <label for="reason">Reason for Deletion (Optional)</label>
+                <textarea id="reason" name="reason"
+                    placeholder="Tell us why you want to delete your account"></textarea>
+            </div>
+            <button type="submit">Submit Request</button>
+            <div id="form-message" class="message"></div>
+        </form>
+    </div>
+
+    <script>
+        const form = document.getElementById('delete-account-form');
+        const messageDiv = document.getElementById('form-message');
+
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault(); // Prevent default form submission
+
+            // Reset message
+            messageDiv.textContent = '';
+            messageDiv.className = 'message';
+
+            const email = document.getElementById('email').value;
+            const reason = document.getElementById('reason').value;
+
+            try {
+                const response = await fetch('http://127.0.0.1:54321/functions/v1/account_deletion_request', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        // Add Supabase authorization token if required
+                        // 'Authorization': 'Bearer your-supabase-anon-key'
+                    },
+                    body: JSON.stringify({ email, reason })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    messageDiv.textContent = data.message || 'Your account deletion request has been submitted successfully!';
+                    messageDiv.className = 'message success';
+                    form.reset(); // Clear the form
+                } else {
+                    messageDiv.textContent = data.message || 'Failed to submit deletion request. Please try again.';
+                    messageDiv.className = 'message error';
+                }
+            } catch (error) {
+                messageDiv.textContent = 'An error occurred while submitting your request. Please try again later.';
+                messageDiv.className = 'message error';
+                console.error('Error:', error);
+            }
+        });
+    </script>
+</body>
+
+</html>
